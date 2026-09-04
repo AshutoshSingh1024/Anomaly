@@ -8,7 +8,8 @@ class GameClock:
     minute: int = 0
 
     # 5 real seconds = 10 in-game minutes.
-    # Therefore 1 real second = 2 in-game minutes.
+    # Therefore:
+    # 1 real second = 2 in-game minutes.
     REAL_SECONDS_PER_GAME_MINUTE = 0.5
 
     def advance_minutes(self, minutes: int = 10):
@@ -45,4 +46,8 @@ class GameClock:
         return "sun" if self.is_day else "moon"
 
     def display(self):
-        return f"Day {self.day} | {self.hour:02d}:{self.minute:02d} | {self.period}"
+        return (
+            f"Day {self.day} | "
+            f"{self.hour:02d}:{self.minute:02d} | "
+            f"{self.period}"
+        )

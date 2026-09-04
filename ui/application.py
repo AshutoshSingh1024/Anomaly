@@ -78,13 +78,17 @@ class AnomalyApp:
             )
             return
 
-        # Every command becomes an interaction pause.
+        # Every interaction pauses the simulation.
+        self.controller.pause_for_interaction()
         self.terminal.lock()
 
     def continue_interaction(self):
+        self.controller.continue_after_interaction()
+
         self.terminal.unlock()
 
         self.world.refresh()
+
         self.terminal.refresh(
             self.controller.transcript()
         )
@@ -92,10 +96,14 @@ class AnomalyApp:
     def realtime_tick(self):
         # 1 real second = 2 game minutes.
         # Therefore 5 real seconds = 10 game minutes.
-        if self.controller.time_running:
+        if (
+            self.controller.time_running
+            and not self.controller.interaction_paused
+        ):
             self.controller.advance_time(2)
 
             self.world.refresh()
+
             self.terminal.refresh(
                 self.controller.transcript()
             )

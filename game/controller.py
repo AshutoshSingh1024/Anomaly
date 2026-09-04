@@ -19,8 +19,12 @@ class GameController:
         self.parser = CommandParser()
         self.executor = CommandExecutor(self)
 
-        # Real-time simulation state.
+        # Automatic simulation time.
         self.time_running = True
+
+        # Temporary interaction pause.
+        # This is different from the user's manual stop command.
+        self.interaction_paused = False
 
         self.messages = [
             "You are standing on a quiet road.",
@@ -38,9 +42,8 @@ class GameController:
 
         result = self.executor.execute(command)
 
-        # Commands only consume simulation time while the clock is running.
         if result.consumes_time and self.time_running:
-            self.advance_time(5)
+            self.advance_time(2)
 
         self.messages.extend([
             result.text,
@@ -49,19 +52,29 @@ class GameController:
 
         return result
 
-    def advance_time(self, minutes=10):
+    def advance_time(self, minutes=2):
         if not self.time_running:
+            return
+
+        if self.interaction_paused:
             return
 
         old_day = self.state.clock.day
 
         self.state.clock.advance_minutes(minutes)
+
         self.state.world.tick(self.state)
 
         if self.state.clock.day != old_day:
             self.messages.append(
                 f"A new day begins. Day {self.state.clock.day}."
             )
+
+    def pause_for_interaction(self):
+        self.interaction_paused = True
+
+    def continue_after_interaction(self):
+        self.interaction_paused = False
 
     def start_time(self):
         self.time_running = True
@@ -77,14 +90,19 @@ class GameController:
         path.parent.mkdir(parents=True, exist_ok=True)
 
         path.write_text(
-            json.dumps(self.state.to_dict(), indent=2),
+            json.dumps(
+                self.state.to_dict(),
+                indent=2
+            ),
             encoding="utf-8"
         )
 
     def load(self, path=Path("saves/save.json")):
         self.state = GameState.from_dict(
             json.loads(
-                path.read_text(encoding="utf-8")
+                path.read_text(
+                    encoding="utf-8"
+                )
             )
         )
 
@@ -95,4 +113,6 @@ class GameController:
         ]
 
     def transcript(self):
-        return "\n".join(self.messages[-80:])
+        return "\n".join(
+            self.messages[-80:]
+        )

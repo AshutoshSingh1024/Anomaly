@@ -7,11 +7,13 @@ class TerminalView(tk.Frame):
             parent,
             bd=1,
             relief="sunken",
-            bg="#0b0d10"
+            bg="#080a0d"
         )
 
         self.on_command = on_command
         self.on_continue = on_continue
+
+        self.locked = False
 
         self.output = tk.Text(
             self,
@@ -35,7 +37,7 @@ class TerminalView(tk.Frame):
 
         bottom = tk.Frame(
             self,
-            bg="#0b0d10"
+            bg="#080a0d"
         )
 
         bottom.pack(
@@ -47,7 +49,7 @@ class TerminalView(tk.Frame):
         tk.Label(
             bottom,
             text=">",
-            bg="#0b0d10",
+            bg="#080a0d",
             fg="#ffffff",
             font=("Consolas", 11, "bold")
         ).pack(
@@ -61,6 +63,8 @@ class TerminalView(tk.Frame):
             fg="#ffffff",
             insertbackground="#ffffff",
             selectbackground="#3d5870",
+            disabledbackground="#0b0d10",
+            disabledforeground="#555b63",
             relief="flat",
             font=("Consolas", 11)
         )
@@ -71,35 +75,16 @@ class TerminalView(tk.Frame):
             expand=True
         )
 
+        # Physical keyboard Enter.
         self.entry.bind(
             "<Return>",
-            self.submit
-        )
-
-        self.enter_button = tk.Button(
-            bottom,
-            text="ENTER",
-            command=self.continue_interaction,
-            bg="#27313b",
-            fg="#ffffff",
-            activebackground="#3c4d5c",
-            activeforeground="#ffffff",
-            relief="flat",
-            padx=14,
-            pady=4,
-            font=("Consolas", 9, "bold"),
-            state="disabled"
-        )
-
-        self.enter_button.pack(
-            side="left",
-            padx=(8, 0)
+            self.handle_enter
         )
 
         self.status = tk.Label(
             self,
             text="READY",
-            bg="#0b0d10",
+            bg="#080a0d",
             fg="#7dff9b",
             font=("Consolas", 8, "bold")
         )
@@ -112,35 +97,44 @@ class TerminalView(tk.Frame):
 
         self.entry.focus_set()
 
-    def submit(self, _=None):
-        if str(self.entry["state"]) == "disabled":
+    def handle_enter(self, _=None):
+        if self.locked:
+            self.on_continue()
             return "break"
 
-        text = self.entry.get().strip()
-
-        if text:
-            self.entry.delete(0, "end")
-            self.on_command(text)
-
+        self.submit()
         return "break"
 
-    def lock(self):
-        self.entry.config(state="disabled")
+    def submit(self):
+        text = self.entry.get().strip()
 
-        self.enter_button.config(
-            state="normal"
+        if not text:
+            return
+
+        self.entry.delete(
+            0,
+            "end"
+        )
+
+        self.on_command(text)
+
+    def lock(self):
+        self.locked = True
+
+        self.entry.config(
+            state="disabled"
         )
 
         self.status.config(
-            text="WAITING FOR ENTER",
+            text="PAUSED • PRESS ENTER",
             fg="#ffd166"
         )
 
     def unlock(self):
-        self.entry.config(state="normal")
+        self.locked = False
 
-        self.enter_button.config(
-            state="disabled"
+        self.entry.config(
+            state="normal"
         )
 
         self.status.config(
@@ -150,11 +144,10 @@ class TerminalView(tk.Frame):
 
         self.entry.focus_set()
 
-    def continue_interaction(self):
-        self.on_continue()
-
     def refresh(self, text):
-        self.output.config(state="normal")
+        self.output.config(
+            state="normal"
+        )
 
         self.output.delete(
             "1.0",
@@ -166,7 +159,9 @@ class TerminalView(tk.Frame):
             text
         )
 
-        self.output.see("end")
+        self.output.see(
+            "end"
+        )
 
         self.output.config(
             state="disabled"

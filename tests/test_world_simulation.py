@@ -21,6 +21,22 @@ class WorldSimulationTests(unittest.TestCase):
         self.assertTrue(self.world.event_log)
         self.assertTrue(thomas.memories)
 
+    def test_world_is_large_without_storing_terrain_tiles(self):
+        self.assertEqual((self.world.width, self.world.height), (1000, 1000))
+        self.assertEqual(self.world.region_at(500, 500), self.world.region_at(500, 500))
+        self.assertFalse(hasattr(self.world, "tiles"))
+
+    def test_nearby_npcs_create_a_social_event(self):
+        thomas = self.world.npcs["thomas"]
+        martha = self.world.npcs["martha"]
+        thomas.x = thomas.y = 20
+        martha.x, martha.y = 21, 20
+        self.state.clock.minute = 30
+
+        self.world._npc_social_tick(self.state.clock)
+
+        self.assertEqual(self.world.event_log[-1]["kind"], "npc_interaction")
+
     def test_rain_changes_npc_behavior_to_shelter(self):
         self.state.clock.hour = 14
         self.state.clock.minute = 10

@@ -12,6 +12,21 @@ class World:
     npcs:dict=field(default_factory=dict)
     weather:str="clear"
     event_log:list[dict]=field(default_factory=list)
+
+    def region_at(self, x, y):
+        """Return deterministic terrain without storing one million tiles."""
+        if abs(x - 15) <= 30 and abs(y - 10) <= 30:
+            return "village"
+        value = ((x // 47) * 19 + (y // 53) * 31 + (x * y) // 997) % 100
+        if value < 16:
+            return "lake"
+        if value < 38:
+            return "forest"
+        if value < 54:
+            return "highlands"
+        if value < 68:
+            return "marsh"
+        return "plains"
     def create_player(self): return Player()
     def object_at(self,x,y): return [o for o in self.objects.values() if not o.hidden and (o.x,o.y)==(x,y)]
     def npc_at(self,x,y): return [n for n in self.npcs.values() if n.alive and (n.x,n.y)==(x,y)]
@@ -50,6 +65,22 @@ class World:
                 )
 
             self._move_toward(npc, target)
+
+        self._npc_social_tick(clock)
+
+    def _npc_social_tick(self, clock):
+        if clock.minute % 30:
+            return
+        living = [npc for npc in self.npcs.values() if npc.alive]
+        for index, first in enumerate(living):
+            for second in living[index + 1:]:
+                if abs(first.x - second.x) + abs(first.y - second.y) <= 1:
+                    self.record_event(
+                        f"{first.name} and {second.name} stop to exchange news.",
+                        clock,
+                        "npc_interaction"
+                    )
+                    return
 
     def _routine_for(self, npc, clock):
         entry = None

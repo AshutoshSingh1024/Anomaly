@@ -11,7 +11,7 @@ def routine(*entries):
 
 
 def create_initial_world():
-    w = World(width=31, height=21)
+    w = World(width=1000, height=1000)
     w.locations["village"] = Location(
         "village", "Village", 15, 10,
         "A small settlement connected by an old road.", 6, {"settlement"}

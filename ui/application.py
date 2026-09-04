@@ -25,6 +25,28 @@ class AnomalyApp:
             expand=True
         )
 
+        self.top_bar = tk.Frame(main, bg="#111820", height=34)
+        self.top_bar.pack(fill="x", padx=8, pady=(8, 0))
+        self.top_bar.pack_propagate(False)
+        tk.Label(
+            self.top_bar,
+            text="ANOMALY // WORLD INTERFACE",
+            bg="#111820",
+            fg="#d8e7f4",
+            font=("Consolas", 10, "bold")
+        ).pack(side="left", padx=10)
+        tk.Button(
+            self.top_bar,
+            text="WORLD LOG",
+            command=self.show_world_log,
+            bg="#263746",
+            fg="#ffffff",
+            activebackground="#3b566b",
+            activeforeground="#ffffff",
+            relief="flat",
+            font=("Consolas", 9, "bold")
+        ).pack(side="right", padx=6, pady=4)
+
         self.world = WorldView(
             main,
             self.controller
@@ -138,6 +160,30 @@ class AnomalyApp:
         )
 
         self.world.refresh()
+
+    def show_world_log(self):
+        log_window = tk.Toplevel(self.root)
+        log_window.title("Anomaly — World Log")
+        log_window.geometry("620x380")
+        log_window.configure(bg="#080a0d")
+        output = tk.Text(
+            log_window, bg="#080a0d", fg="#e7edf4", wrap="word",
+            font=("Consolas", 10), relief="flat", state="normal"
+        )
+        output.pack(fill="both", expand=True, padx=10, pady=10)
+        output.insert("end", "WORLD LOG\n\n")
+        events = self.controller.state.world.recent_events(30)
+        if events:
+            for event in events:
+                output.insert(
+                    "end",
+                    f"Day {event['day']} {event['hour']:02d}:{event['minute']:02d} — "
+                    f"{event['text']}\n"
+                )
+        else:
+            output.insert("end", "No recent world events have been recorded.\n")
+        output.insert("end", "\nANOMALY STATUS: No anomaly has been noticed.\n")
+        output.config(state="disabled")
 
     def close(self):
         if messagebox.askyesno(

@@ -7,14 +7,19 @@ class GameClock:
     hour: int = 8
     minute: int = 0
 
-    REAL_SECONDS_PER_GAME_MINUTE = 0.2  # 1 real second = 5 game minutes
+    # 5 real seconds = 10 in-game minutes.
+    # Therefore 1 real second = 2 in-game minutes.
+    REAL_SECONDS_PER_GAME_MINUTE = 0.5
 
-    def advance_minutes(self, minutes: int = 5):
+    def advance_minutes(self, minutes: int = 10):
         if minutes < 0:
             raise ValueError("Time cannot move backwards.")
+
         total = self.hour * 60 + self.minute + minutes
+
         self.day += total // (24 * 60)
         total %= 24 * 60
+
         self.hour = total // 60
         self.minute = total % 60
 

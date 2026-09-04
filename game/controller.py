@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+
 from game.state import GameState
 from terminal.parser import CommandParser
 from terminal.executor import CommandExecutor
@@ -9,39 +10,89 @@ from world.generation import create_initial_world
 class GameController:
     def __init__(self):
         world = create_initial_world()
-        self.state = GameState(world, world.create_player())
+
+        self.state = GameState(
+            world,
+            world.create_player()
+        )
+
         self.parser = CommandParser()
         self.executor = CommandExecutor(self)
+
+        # Real-time simulation state.
+        self.time_running = True
+
         self.messages = [
             "You are standing on a quiet road.",
             "Nothing appears to be waiting for you.",
-            "", self.state.clock.display(), "Type 'help' for commands."
+            "",
+            self.state.clock.display(),
+            "Type 'help' for commands."
         ]
 
     def execute(self, raw):
         command = self.parser.parse(raw)
+
         if not command.name:
-            return self.executor.result("")
+            return self.executor.result("", False)
+
         result = self.executor.execute(command)
-        if result.consumes_time:
+
+        # Commands only consume simulation time while the clock is running.
+        if result.consumes_time and self.time_running:
             self.advance_time(5)
-        self.messages.extend([result.text, self.state.clock.display()])
+
+        self.messages.extend([
+            result.text,
+            self.state.clock.display()
+        ])
+
         return result
 
-    def advance_time(self, minutes=5):
+    def advance_time(self, minutes=10):
+        if not self.time_running:
+            return
+
         old_day = self.state.clock.day
+
         self.state.clock.advance_minutes(minutes)
         self.state.world.tick(self.state)
+
         if self.state.clock.day != old_day:
-            self.messages.append(f"A new day begins. Day {self.state.clock.day}.")
+            self.messages.append(
+                f"A new day begins. Day {self.state.clock.day}."
+            )
+
+    def start_time(self):
+        self.time_running = True
+
+    def stop_time(self):
+        self.time_running = False
+
+    def toggle_time(self):
+        self.time_running = not self.time_running
+        return self.time_running
 
     def save(self, path=Path("saves/save.json")):
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(self.state.to_dict(), indent=2), encoding="utf-8")
+
+        path.write_text(
+            json.dumps(self.state.to_dict(), indent=2),
+            encoding="utf-8"
+        )
 
     def load(self, path=Path("saves/save.json")):
-        self.state = GameState.from_dict(json.loads(path.read_text(encoding="utf-8")))
-        self.messages = ["Saved world loaded.", "", self.state.clock.display()]
+        self.state = GameState.from_dict(
+            json.loads(
+                path.read_text(encoding="utf-8")
+            )
+        )
+
+        self.messages = [
+            "Saved world loaded.",
+            "",
+            self.state.clock.display()
+        ]
 
     def transcript(self):
         return "\n".join(self.messages[-80:])

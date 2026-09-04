@@ -1,9 +1,1 @@
-.gradle/
-.idea/
-build/
-**/build/
-local.properties
-.DS_Store
-*.iml
-.externalNativeBuild/
-.cxx/
+__pycache__/\n*.py[cod]\n.venv/\nvenv/\n.vscode/\n.idea/\nbuild/\ndist/\nsaves/*.json\n*.log\n

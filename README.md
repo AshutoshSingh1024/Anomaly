@@ -29,8 +29,19 @@ Install Python 3.10+ on Windows, then run `python main.py`, or double-click `run
 
 `UI -> GameController -> CommandParser/Executor -> World/Entities/Clock -> GameState`
 
-## Future Scope
+Rendering is separated from simulation so later systems can grow without rewriting the UI.
+
+## Future
 
 NPC schedules, needs, goals, relationships, memory, knowledge, rumors, economy, autonomous events, anomaly detection, larger worlds, and optional C++ acceleration can be added later.
 
+C++ is deliberately not required yet. Profile first, optimize second.
 
+## Current prototype features
+
+- Colored world grid with visible `x,y` coordinates.
+- In-game time advances automatically: **1 real second = 5 in-game minutes**.
+- Basic day/night cycle with sun and moon indicators.
+- Expanded starting village with several NPCs and world objects.
+- Coordinate movement such as `move to (10,15)` or `move 10 15`.
+- Directional movement remains available with `move north`, `move south`, etc.

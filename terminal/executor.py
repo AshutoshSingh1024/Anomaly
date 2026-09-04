@@ -35,6 +35,7 @@ class CommandExecutor:
             "Commands:\n"
             "  look / observe\n"
             "  move north|south|east|west\n"
+            "  move to (x,y)  (also accepts: move x y)\n"
             "  find <thing>\n"
             "  inspect <thing>\n"
             "  take <thing>\n"
@@ -53,15 +54,49 @@ class CommandExecutor:
         return self.result(f"You are at ({self.player.x}, {self.player.y}).\n{self.world.nearby_description(self.player)}")
 
     def move(self, args):
-        if not args: return self.result("Move where? north, south, east or west.", False)
-        dirs = {"north":(0,-1),"south":(0,1),"east":(1,0),"west":(-1,0),"n":(0,-1),"s":(0,1),"e":(1,0),"w":(-1,0)}
-        if args[0].lower() not in dirs: return self.result("That is not a valid direction.", False)
-        dx,dy = dirs[args[0].lower()]
-        nx,ny = self.player.x+dx,self.player.y+dy
-        if abs(nx)>self.world.width//2 or abs(ny)>self.world.height//2:
+        if not args:
+            return self.result("Move where? Use a direction or coordinates, e.g. 'move north' or 'move to (10,15)'.", False)
+
+        # Coordinate movement: move to (x,y), move (x,y), or move to x y
+        cleaned = [a.strip("(),") for a in args]
+        if cleaned[0].lower() == "to":
+            cleaned = cleaned[1:]
+
+        if len(cleaned) == 1 and "," in cleaned[0]:
+            parts = [p.strip() for p in cleaned[0].split(",")]
+        else:
+            parts = cleaned
+
+        if len(parts) == 2:
+            try:
+                tx, ty = int(parts[0]), int(parts[1])
+            except ValueError:
+                tx = ty = None
+            if tx is not None:
+                if not (0 <= tx < self.world.width and 0 <= ty < self.world.height):
+                    return self.result("Those coordinates are outside the known world.", False)
+                if (tx, ty) == (self.player.x, self.player.y):
+                    return self.result("You are already there.", False)
+                distance = abs(tx - self.player.x) + abs(ty - self.player.y)
+                self.player.x, self.player.y = tx, ty
+                return self.result(
+                    f"You move to ({tx}, {ty}) ({distance} tiles).\n"
+                    f"{self.world.nearby_description(self.player)}"
+                )
+
+        dirs = {
+            "north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0),
+            "n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)
+        }
+        direction = args[0].lower()
+        if direction not in dirs:
+            return self.result("That is not a valid movement. Try 'move north' or 'move to (10,15)'.", False)
+        dx, dy = dirs[direction]
+        nx, ny = self.player.x + dx, self.player.y + dy
+        if not (0 <= nx < self.world.width and 0 <= ny < self.world.height):
             return self.result("You cannot go that way.", False)
-        self.player.move(dx,dy)
-        return self.result(f"You move {args[0]} to ({nx}, {ny}).\n{self.world.nearby_description(self.player)}")
+        self.player.move(dx, dy)
+        return self.result(f"You move {direction} to ({nx}, {ny}).\n{self.world.nearby_description(self.player)}")
 
     def find(self, args):
         if not args: return self.result("Find what?", False)

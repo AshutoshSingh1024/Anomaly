@@ -10,7 +10,7 @@ class GameState:
     clock: GameClock = field(default_factory=GameClock)
 
     def to_dict(self):
-        return {"clock": {"day": self.clock.day, "hour": self.clock.hour},
+        return {"clock": {"day": self.clock.day, "hour": self.clock.hour, "minute": self.clock.minute},
                 "player": self.player.to_dict(), "world": self.world.to_dict()}
 
     @classmethod
@@ -18,4 +18,4 @@ class GameState:
         c = data.get("clock", {})
         return cls(World.from_dict(data.get("world", {})),
                    Player.from_dict(data.get("player", {})),
-                   GameClock(int(c.get("day", 1)), int(c.get("hour", 8))))
+                   GameClock(int(c.get("day", 1)), int(c.get("hour", 8)), int(c.get("minute", 0))))

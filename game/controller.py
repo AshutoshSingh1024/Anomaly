@@ -5,6 +5,7 @@ from terminal.parser import CommandParser
 from terminal.executor import CommandExecutor
 from world.generation import create_initial_world
 
+
 class GameController:
     def __init__(self):
         world = create_initial_world()
@@ -23,10 +24,16 @@ class GameController:
             return self.executor.result("")
         result = self.executor.execute(command)
         if result.consumes_time:
-            self.state.clock.advance()
-            self.state.world.tick(self.state)
+            self.advance_time(5)
         self.messages.extend([result.text, self.state.clock.display()])
         return result
+
+    def advance_time(self, minutes=5):
+        old_day = self.state.clock.day
+        self.state.clock.advance_minutes(minutes)
+        self.state.world.tick(self.state)
+        if self.state.clock.day != old_day:
+            self.messages.append(f"A new day begins. Day {self.state.clock.day}.")
 
     def save(self, path=Path("saves/save.json")):
         path.parent.mkdir(parents=True, exist_ok=True)

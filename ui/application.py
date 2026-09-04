@@ -50,6 +50,15 @@ class AnomalyApp:
             pady=(4, 8)
         )
 
+        # The entry is disabled while waiting for acknowledgement, so its
+        # widget-level binding cannot be the only way to receive Enter.
+        # This binding also works if focus has moved elsewhere in the window.
+        self.root.bind(
+            "<Return>",
+            self.handle_global_enter,
+            add="+"
+        )
+
         self.refresh()
 
         self.root.protocol(
@@ -78,11 +87,21 @@ class AnomalyApp:
             )
             return
 
-        # Every interaction pauses the simulation.
-        self.controller.pause_for_interaction()
-        self.terminal.lock()
+        if self.controller.interaction_paused:
+            self.terminal.lock()
+
+    def handle_global_enter(self, _=None):
+        """Resume a locked interaction without submitting another command."""
+        if not self.terminal.locked:
+            return None
+
+        self.continue_interaction()
+        return "break"
 
     def continue_interaction(self):
+        if not self.controller.interaction_paused:
+            return
+
         self.controller.continue_after_interaction()
 
         self.terminal.unlock()

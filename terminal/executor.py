@@ -17,7 +17,7 @@ class CommandExecutor:
     def player(self):
         return self.state.player
 
-    def result(self, text, consumes_time=False, quit_requested=False):
+    def result(self, text, consumes_time=True, quit_requested=False):
         return CommandResult(
             text,
             consumes_time,

@@ -50,6 +50,12 @@ class GameController:
             self.state.clock.display()
         ])
 
+        # A completed player command always creates an interaction boundary.
+        # Whether the clock is manually running is deliberately independent
+        # from this temporary pause.
+        if not result.quit_requested:
+            self.pause_for_interaction()
+
         return result
 
     def advance_time(self, minutes=2):

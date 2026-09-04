@@ -1,0 +1,9 @@
+<resources>
+    <color name="background">#101010</color>
+    <color name="panel">#181818</color>
+    <color name="terminal">#0B0B0B</color>
+    <color name="text">#E6E6E6</color>
+    <color name="muted_text">#929292</color>
+    <color name="accent">#FFFFFF</color>
+    <color name="border">#303030</color>
+</resources>

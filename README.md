@@ -23,7 +23,7 @@ Install Python 3.10+ on Windows, then run `python main.py`, or double-click `run
 
 ## Commands
 
-`look`, `move north|south|east|west`, `find <thing>`, `inspect <thing>`, `take <thing>`, `drop <thing>`, `eat <thing>`, `drink <thing>`, `talk <person>`, `wait`, `start`/`resume`, `stop`, `save`, `load`, `clear`, `help`, `quit`.
+`look`, `move north|south|east|west`, `find <thing>`, `inspect <thing>`, `take <thing>`, `drop <thing>`, `eat <thing>`, `drink <thing>`, `talk <person>`, `wait`, `start`/`resume`, `stop`, `speed up|down|normal`, `save`, `load`, `clear`, `help`, `quit`.
 
 ## Architecture
 
@@ -41,6 +41,8 @@ NPC schedules, needs, goals, relationships, memory, knowledge, rumors, economy, 
 - Colored world grid with visible `x,y` coordinates.
 - In-game time advances automatically: **1 real second = 2 in-game minutes** (5 real seconds = 10 in-game minutes).
 - After each command, the terminal waits for a physical Enter press before accepting the next command. This interaction pause never changes game time; a manual `stop` remains in effect after it is dismissed.
+- `speed up` and `speed down` change automatic simulation speed by a factor of 10; `speed normal` restores 1x speed.
+- The map has horizontal and vertical scrollbars. Mouse wheel scrolls vertically; Shift + mouse wheel scrolls horizontally.
 - Basic day/night cycle with sun and moon indicators.
 - Expanded starting village with several NPCs and world objects.
 - Coordinate movement such as `move to (10,15)` or `move 10 15`.

@@ -21,6 +21,8 @@ class GameController:
 
         # Automatic simulation time.
         self.time_running = True
+        self.time_scale = 1.0
+        self._realtime_minute_remainder = 0.0
 
         # Temporary interaction pause.
         # This is different from the user's manual stop command.
@@ -75,6 +77,34 @@ class GameController:
             self.messages.append(
                 f"A new day begins. Day {self.state.clock.day}."
             )
+
+    def advance_realtime(self, minutes=2):
+        """Advance automatic simulation time at the selected speed."""
+        scaled_minutes = (
+            minutes * self.time_scale
+            + self._realtime_minute_remainder
+        )
+        whole_minutes = int(scaled_minutes)
+        self._realtime_minute_remainder = scaled_minutes - whole_minutes
+
+        if whole_minutes:
+            self.advance_time(whole_minutes)
+
+    def speed_up_time(self):
+        self.time_scale *= 10
+        return self.time_scale
+
+    def slow_down_time(self):
+        self.time_scale /= 10
+        return self.time_scale
+
+    def reset_time_speed(self):
+        self.time_scale = 1.0
+        self._realtime_minute_remainder = 0.0
+        return self.time_scale
+
+    def time_speed_display(self):
+        return f"{self.time_scale:g}x"
 
     def pause_for_interaction(self):
         self.interaction_paused = True

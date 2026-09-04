@@ -18,7 +18,35 @@ class WorldView(tk.Frame):
             highlightthickness=0
         )
 
+        self.vertical_scroll = tk.Scrollbar(
+            self,
+            orient="vertical",
+            command=self.canvas.yview
+        )
+
+        self.horizontal_scroll = tk.Scrollbar(
+            self,
+            orient="horizontal",
+            command=self.canvas.xview
+        )
+
+        self.canvas.configure(
+            xscrollcommand=self.horizontal_scroll.set,
+            yscrollcommand=self.vertical_scroll.set
+        )
+
+        self.horizontal_scroll.pack(
+            side="bottom",
+            fill="x"
+        )
+
+        self.vertical_scroll.pack(
+            side="right",
+            fill="y"
+        )
+
         self.canvas.pack(
+            side="left",
             fill="both",
             expand=True
         )
@@ -36,6 +64,16 @@ class WorldView(tk.Frame):
         self.canvas.bind(
             "<Leave>",
             self.on_mouse_leave
+        )
+
+        self.canvas.bind(
+            "<MouseWheel>",
+            self.on_mouse_wheel
+        )
+
+        self.canvas.bind(
+            "<Shift-MouseWheel>",
+            self.on_shift_mouse_wheel
         )
 
         self.grid_geometry = None
@@ -140,6 +178,11 @@ class WorldView(tk.Frame):
         else:
             clock_text += "  |  STOPPED"
 
+        clock_text += (
+            "  |  SPEED "
+            f"{self.controller.time_speed_display()}"
+        )
+
         c.create_text(
             18,
             38,
@@ -228,6 +271,15 @@ class WorldView(tk.Frame):
             cell,
             w.width,
             w.height
+        )
+
+        c.configure(
+            scrollregion=(
+                0,
+                0,
+                max(W, gx + grid_w + 20),
+                max(H, gy + grid_h + 48)
+            )
         )
 
         def pos(x, y):
@@ -448,6 +500,9 @@ class WorldView(tk.Frame):
 
         gx, gy, cell, width, height = self.grid_geometry
 
+        mouse_x = self.canvas.canvasx(mouse_x)
+        mouse_y = self.canvas.canvasy(mouse_y)
+
         world_x = int(
             (mouse_x - gx) // cell
         )
@@ -501,3 +556,17 @@ class WorldView(tk.Frame):
     def on_mouse_leave(self, _):
         self.hover_text = None
         self.draw()
+
+    def on_mouse_wheel(self, event):
+        self.canvas.yview_scroll(
+            -int(event.delta / 120),
+            "units"
+        )
+        return "break"
+
+    def on_shift_mouse_wheel(self, event):
+        self.canvas.xview_scroll(
+            -int(event.delta / 120),
+            "units"
+        )
+        return "break"

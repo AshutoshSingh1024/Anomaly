@@ -57,6 +57,9 @@ class CommandExecutor:
             "resume": self.start,
             "stop": self.stop,
             "pause": self.stop,
+            "speed": self.speed,
+            "faster": self.speed_up,
+            "slower": self.speed_down,
 
             "clear": self.clear,
             "save": self.save,
@@ -92,6 +95,7 @@ class CommandExecutor:
             "  wait\n"
             "  start / resume\n"
             "  stop / pause\n"
+            "  speed up|down|normal\n"
             "  save / load\n"
             "  clear\n"
             "  quit"
@@ -437,6 +441,43 @@ class CommandExecutor:
 
         return self.result(
             "Time stops. The world waits.",
+            False
+        )
+
+    def speed(self, args):
+        if not args:
+            return self.result(
+                "Time speed is "
+                f"{self.controller.time_speed_display()}. "
+                "Use 'speed up', 'speed down', or 'speed normal'.",
+                False
+            )
+
+        direction = args[0].lower()
+        if direction in ("up", "faster"):
+            return self.speed_up(args)
+        if direction in ("down", "slower"):
+            return self.speed_down(args)
+        if direction in ("normal", "reset"):
+            self.controller.reset_time_speed()
+            return self.result("Time speed returns to 1x.", False)
+
+        return self.result(
+            "Use 'speed up', 'speed down', or 'speed normal'.",
+            False
+        )
+
+    def speed_up(self, _):
+        speed = self.controller.speed_up_time()
+        return self.result(
+            f"Time speed increases to {speed:g}x.",
+            False
+        )
+
+    def speed_down(self, _):
+        speed = self.controller.slow_down_time()
+        return self.result(
+            f"Time speed decreases to {speed:g}x.",
             False
         )
 

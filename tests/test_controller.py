@@ -67,6 +67,20 @@ class ControllerTimeTests(unittest.TestCase):
 
         self.assertEqual(self.clock_position(), (1, 8, 7))
 
+    def test_realtime_speed_controls_are_tenfold(self):
+        self.controller.advance_realtime(2)
+        self.assertEqual(self.clock_position(), (1, 8, 2))
+
+        self.controller.speed_up_time()
+        self.controller.advance_realtime(2)
+        self.assertEqual(self.clock_position(), (1, 8, 22))
+
+        self.controller.reset_time_speed()
+        self.controller.slow_down_time()
+        for _ in range(5):
+            self.controller.advance_realtime(2)
+        self.assertEqual(self.clock_position(), (1, 8, 23))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -119,7 +119,7 @@ class AnomalyApp:
             self.controller.time_running
             and not self.controller.interaction_paused
         ):
-            self.controller.advance_time(2)
+            self.controller.advance_realtime(2)
 
             self.world.refresh()
 

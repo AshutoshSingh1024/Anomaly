@@ -23,7 +23,7 @@ Install Python 3.10+ on Windows, then run `python main.py`, or double-click `run
 
 ## Commands
 
-`look`, `move north|south|east|west`, `find <thing>`, `inspect <thing>`, `take <thing>`, `drop <thing>`, `eat <thing>`, `drink <thing>`, `talk <person>`, `wait`, `start`/`resume`, `stop`, `speed up|down|normal`, `save`, `load`, `clear`, `help`, `quit`.
+`look`, `move north|south|east|west`, `find <thing>`, `inspect <thing>`, `take <thing>`, `drop <thing>`, `eat <thing>`, `drink <thing>`, `talk <person>`, `events`/`rumors`, `wait`, `start`/`resume`, `stop`, `speed up|down|normal`, `save`, `load`, `clear`, `help`, `quit`.
 
 ## Architecture
 
@@ -43,6 +43,8 @@ NPC schedules, needs, goals, relationships, memory, knowledge, rumors, economy, 
 - After each command, the terminal waits for a physical Enter press before accepting the next command. This interaction pause never changes game time; a manual `stop` remains in effect after it is dismissed.
 - `speed up` and `speed down` change automatic simulation speed by a factor of 10; `speed normal` restores 1x speed.
 - The map has horizontal and vertical scrollbars. Mouse wheel scrolls vertically; Shift + mouse wheel scrolls horizontally.
+- NPCs follow individual day schedules, retain recent memories, react to rain by sheltering, and share recent world events as rumors when spoken to.
+- Weather changes through clear, cloudy, windy, rainy, and storm conditions; it is shown in the map HUD and changes map ambience.
 - Basic day/night cycle with sun and moon indicators.
 - Expanded starting village with several NPCs and world objects.
 - Coordinate movement such as `move to (10,15)` or `move 10 15`.

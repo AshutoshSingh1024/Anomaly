@@ -50,6 +50,8 @@ class CommandExecutor:
 
             "talk": self.talk,
             "speak": self.talk,
+            "events": self.events,
+            "rumors": self.events,
 
             "wait": self.wait,
 
@@ -92,6 +94,7 @@ class CommandExecutor:
             "  eat <thing>\n"
             "  drink <thing>\n"
             "  talk <person>\n"
+            "  events / rumors\n"
             "  wait\n"
             "  start / resume\n"
             "  stop / pause\n"
@@ -421,9 +424,50 @@ class CommandExecutor:
                 False
             )
 
-        return self.result(
-            "\n".join(npc.dialogue)
+        clock = self.state.clock
+        npc.remember(
+            "Spoke with the stranger.",
+            clock.day,
+            clock.hour
         )
+
+        lines = [
+            f"{npc.name} is currently {npc.current_activity}.",
+            *npc.dialogue
+        ]
+        memories = [
+            memory for memory in reversed(npc.memories)
+            if memory["text"] != "Spoke with the stranger."
+        ]
+        if memories:
+            rumor = memories[0]
+            lines.append(
+                f'"I heard this: {rumor["text"]}"'
+            )
+
+        self.world.record_event(
+            f"{npc.name} spoke with the stranger.",
+            clock,
+            "conversation",
+            npc.npc_id
+        )
+        return self.result("\n".join(lines))
+
+    def events(self, _):
+        events = self.world.recent_events()
+        if not events:
+            return self.result(
+                "Nothing notable has happened yet. The settlement carries on.",
+                False
+            )
+
+        lines = ["Recent world events:"]
+        for event in events:
+            lines.append(
+                f"  Day {event['day']} {event['hour']:02d}:{event['minute']:02d} "
+                f"— {event['text']}"
+            )
+        return self.result("\n".join(lines), False)
 
     def wait(self, _):
         return self.result("You wait.")

@@ -9,6 +9,31 @@ class NPC:
     description:str
     dialogue:list[str]=field(default_factory=list)
     alive:bool=True
-    def to_dict(self): return self.__dict__.copy()
+    home:tuple[int, int]=(0, 0)
+    schedule:list[dict]=field(default_factory=list)
+    memories:list[dict]=field(default_factory=list)
+    current_activity:str="going about their business"
+    current_schedule_key:str=""
+
+    def remember(self, text, day, hour):
+        self.memories.append({
+            "text": text,
+            "day": day,
+            "hour": hour
+        })
+        self.memories = self.memories[-20:]
+
+    def to_dict(self):
+        data = self.__dict__.copy()
+        data["home"] = list(self.home)
+        return data
+
     @classmethod
-    def from_dict(cls,d): return cls(**d)
+    def from_dict(cls, d):
+        data = dict(d)
+        data["home"] = tuple(data.get("home", (data["x"], data["y"])))
+        data.setdefault("schedule", [])
+        data.setdefault("memories", [])
+        data.setdefault("current_activity", "going about their business")
+        data.setdefault("current_schedule_key", "")
+        return cls(**data)
